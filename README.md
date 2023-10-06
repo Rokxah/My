@@ -15,7 +15,7 @@
 
 - 💬 Ask me about **MySQL, Project & Team Management**
 
-- 📫 How to reach me **gokhan@prestijyazilim.com.tr**
+- 📫 How to reach me **barik@hotmail.com.tr**
 
 ### Blogs posts
 <!-- BLOG-POST-LIST:START -->
