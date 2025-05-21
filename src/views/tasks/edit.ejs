@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-gray-100">
+  <%- include('../partials/navbar') %>
+  <div class="container mx-auto mt-10 mb-20 px-4">
+    <h1 class="text-3xl font-bold mb-8 text-center">Edit Task: <%= task.title %></h1>
+    
+    <div class="flex flex-col lg:flex-row gap-8">
+      <%# Main Content: Task Edit Form %>
+      <div class="lg:w-2/3 bg-white p-8 rounded-lg shadow-xl">
+        <form action="/tasks/<%= task._id %>/update" method="POST">
+          <div class="mb-5">
+            <label for="title" class="block text-gray-800 font-semibold mb-2">Title</label>
+            <input type="text" name="title" id="title" value="<%= task.title %>" class="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+          </div>
+          <div class="mb-5">
+            <label for="description" class="block text-gray-800 font-semibold mb-2">Description</label>
+            <textarea name="description" id="description" rows="5" class="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"><%= task.description %></textarea>
+          </div>
+          <div class="mb-8">
+            <label for="status" class="block text-gray-800 font-semibold mb-2">Status</label>
+            <select name="status" id="status" class="shadow-sm border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="todo" <%= task.status === 'todo' ? 'selected' : '' %>>To Do</option>
+              <option value="inprogress" <%= task.status === 'inprogress' ? 'selected' : '' %>>In Progress</option>
+              <option value="done" <%= task.status === 'done' ? 'selected' : '' %>>Done</option>
+            </select>
+          </div>
+          <div class="flex items-center justify-between">
+            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition duration-150">Update Task</button>
+            <a href="/boards/<%= task.board._id %>" class="text-gray-700 hover:text-blue-600 font-semibold">Back to Board</a>
+          </div>
+        </form>
+      </div>
+
+      <%# Sidebar: Notes and Effort Logging %>
+      <div class="lg:w-1/3 space-y-8">
+        <%# Notes Section %>
+        <div class="bg-white p-6 rounded-lg shadow-xl">
+          <h2 class="text-xl font-semibold mb-4 border-b border-gray-300 pb-3">Notes</h2>
+          <form action="/tasks/<%= task._id %>/notes" method="POST" class="mb-6">
+            <div class="mb-3">
+              <label for="content" class="block text-gray-700 font-medium mb-1 text-sm">Add a Note</label>
+              <textarea name="content" id="content" rows="3" class="shadow-sm appearance-none border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
+            </div>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md text-sm shadow hover:shadow-md transition duration-150">Add Note</button>
+          </form>
+          <div class="space-y-3 max-h-60 overflow-y-auto">
+            <% if (notes && notes.length > 0) { %>
+              <% notes.forEach(note => { %>
+                <div class="bg-gray-50 p-3 rounded-md border border-gray-200 text-sm">
+                  <p class="text-gray-800 mb-1"><%= note.content %></p>
+                  <div class="flex justify-between items-center">
+                    <p class="text-xs text-gray-500"><%= new Date(note.createdAt).toLocaleDateString() %> <%= new Date(note.createdAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) %></p>
+                    <form action="/notes/<%= note._id %>/delete" method="POST" onsubmit="return confirm('Delete this note?');" class="inline">
+                      <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-medium">Delete</button>
+                    </form>
+                  </div>
+                </div>
+              <% }); %>
+            <% } else { %><p class="text-sm text-gray-500">No notes yet.</p><% } %>
+          </div>
+        </div>
+
+        <%# Effort Logging Section %>
+        <div class="bg-white p-6 rounded-lg shadow-xl">
+          <h2 class="text-xl font-semibold mb-4 border-b border-gray-300 pb-3">Effort Log</h2>
+          <form action="/tasks/<%= task._id %>/efforts" method="POST" class="mb-6">
+            <div class="grid grid-cols-2 gap-4 mb-3">
+                <div>
+                    <label for="hours" class="block text-gray-700 font-medium mb-1 text-sm">Hours</label>
+                    <input type="number" name="hours" id="hours" step="0.1" min="0.1" class="shadow-sm appearance-none border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div>
+                    <label for="date" class="block text-gray-700 font-medium mb-1 text-sm">Date</label>
+                    <input type="date" name="date" id="date" value="<%= new Date().toISOString().split('T')[0] %>" class="shadow-sm appearance-none border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+            </div>
+            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md text-sm shadow hover:shadow-md transition duration-150">Log Effort</button>
+          </form>
+          <div class="space-y-3 max-h-60 overflow-y-auto">
+            <% if (efforts && efforts.length > 0) { %>
+              <% efforts.forEach(effort => { %>
+                <div class="bg-gray-50 p-3 rounded-md border border-gray-200 text-sm">
+                  <div class="flex justify-between items-center">
+                    <p class="text-gray-800 font-medium"><%= effort.hours %> hours</p>
+                    <p class="text-xs text-gray-500"><%= new Date(effort.date).toLocaleDateString() %></p>
+                    <form action="/efforts/<%= effort._id %>/delete" method="POST" onsubmit="return confirm('Delete this effort log?');" class="inline">
+                      <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-medium">Delete</button>
+                    </form>
+                  </div>
+                </div>
+              <% }); %>
+            <% } else { %><p class="text-sm text-gray-500">No effort logged yet.</p><% } %>
+          </div>
+          <div class="mt-4 pt-3 border-t border-gray-200">
+            <p class="text-md font-semibold text-gray-800">Total Effort: <%= totalEffort.toFixed(1) %> hours</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

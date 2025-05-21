@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-gray-100">
+  <%- include('../partials/navbar') %> <%/* Assuming navbar partial */%>
+  <div class="container mx-auto mt-10">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold"><%= title %></h1>
+      <a href="/boards/new" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+        Create New Board
+      </a>
+    </div>
+    <% if (boards.length > 0) { %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% boards.forEach(board => { %>
+          <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-2"><%= board.name %></h2>
+            <div class="flex justify-between">
+                <a href="/boards/<%= board._id %>" class="text-blue-500 hover:underline">View</a>
+                <a href="/boards/<%= board._id %>/edit" class="text-yellow-500 hover:underline">Edit</a>
+                <form action="/boards/<%= board._id %>/delete" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this board?');">
+                    <button type="submit" class="text-red-500 hover:underline">Delete</button>
+                </form>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <p>You don't have any boards yet. <a href="/boards/new" class="text-blue-500 hover:underline">Create one!</a></p>
+    <% } %>
+  </div>
+</body>
+</html>

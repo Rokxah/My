@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+  <!-- If using SortableJS, include it here -->
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script> -->
+</head>
+<body class="bg-gray-100">
+  <%- include('../partials/navbar') %>
+  <div class="container mx-auto mt-10 px-4">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+      <h1 class="text-3xl font-bold mb-4 md:mb-0"><%= board.name %></h1>
+      <div class="flex space-x-2">
+        <a href="/boards/<%= board._id %>/edit" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded text-sm">
+          Edit Board
+        </a>
+        <a href="/tasks/new?boardId=<%= board._id %>" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm">
+          Add New Task
+        </a>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="kanbanBoard">
+      <!-- To Do Column -->
+      <div class="bg-gray-200 p-4 rounded-lg shadow min-h-[200px]" data-status="todo">
+        <h2 class="text-xl font-semibold mb-3 text-center border-b-2 border-red-400 pb-2">To Do</h2>
+        <div class="task-list space-y-3" id="todoTasks">
+          <% tasks.filter(t => t.status === 'todo').forEach(task => { %>
+            <div class="bg-white p-3 rounded shadow cursor-grab" data-task-id="<%= task._id %>">
+              <h3 class="font-semibold text-md mb-1"><%= task.title %></h3>
+              <p class="text-sm text-gray-600 mb-2"><%= task.description %></p>
+              <div class="text-xs flex justify-end space-x-2">
+                <a href="/tasks/<%= task._id %>/edit" class="text-blue-500 hover:underline">Edit</a>
+                <form action="/tasks/<%= task._id %>/delete" method="POST" class="inline" onsubmit="return confirm('Delete this task?');">
+                  <button type="submit" class="text-red-500 hover:underline">Delete</button>
+                </form>
+              </div>
+            </div>
+          <% }); %>
+          <% if (tasks.filter(t => t.status === 'todo').length === 0) { %>
+            <p class="text-sm text-gray-500 text-center py-4 empty-column-placeholder">No tasks here.</p>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- In Progress Column -->
+      <div class="bg-gray-200 p-4 rounded-lg shadow min-h-[200px]" data-status="inprogress">
+        <h2 class="text-xl font-semibold mb-3 text-center border-b-2 border-yellow-400 pb-2">In Progress</h2>
+        <div class="task-list space-y-3" id="inprogressTasks">
+          <% tasks.filter(t => t.status === 'inprogress').forEach(task => { %>
+            <div class="bg-white p-3 rounded shadow cursor-grab" data-task-id="<%= task._id %>">
+              <h3 class="font-semibold text-md mb-1"><%= task.title %></h3>
+              <p class="text-sm text-gray-600 mb-2"><%= task.description %></p>
+              <div class="text-xs flex justify-end space-x-2">
+                <a href="/tasks/<%= task._id %>/edit" class="text-blue-500 hover:underline">Edit</a>
+                <form action="/tasks/<%= task._id %>/delete" method="POST" class="inline" onsubmit="return confirm('Delete this task?');">
+                  <button type="submit" class="text-red-500 hover:underline">Delete</button>
+                </form>
+              </div>
+            </div>
+          <% }); %>
+          <% if (tasks.filter(t => t.status === 'inprogress').length === 0) { %>
+            <p class="text-sm text-gray-500 text-center py-4 empty-column-placeholder">No tasks here.</p>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Done Column -->
+      <div class="bg-gray-200 p-4 rounded-lg shadow min-h-[200px]" data-status="done">
+        <h2 class="text-xl font-semibold mb-3 text-center border-b-2 border-green-400 pb-2">Done</h2>
+        <div class="task-list space-y-3" id="doneTasks">
+          <% tasks.filter(t => t.status === 'done').forEach(task => { %>
+            <div class="bg-white p-3 rounded shadow cursor-grab" data-task-id="<%= task._id %>">
+              <h3 class="font-semibold text-md mb-1"><%= task.title %></h3>
+              <p class="text-sm text-gray-600 mb-2"><%= task.description %></p>
+              <div class="text-xs flex justify-end space-x-2">
+                <a href="/tasks/<%= task._id %>/edit" class="text-blue-500 hover:underline">Edit</a>
+                <form action="/tasks/<%= task._id %>/delete" method="POST" class="inline" onsubmit="return confirm('Delete this task?');">
+                  <button type="submit" class="text-red-500 hover:underline">Delete</button>
+                </form>
+              </div>
+            </div>
+          <% }); %>
+          <% if (tasks.filter(t => t.status === 'done').length === 0) { %>
+            <p class="text-sm text-gray-500 text-center py-4 empty-column-placeholder">No tasks here.</p>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    <div class="mt-8">
+        <a href="/boards" class="text-blue-500 hover:underline">&larr; Back to All Boards</a>
+    </div>
+  </div>
+  
+  <!-- Add script for drag and drop at the end of body -->
+  <script>
+    // Basic Drag and Drop (Native HTML5)
+    document.addEventListener('DOMContentLoaded', () => {
+        const taskItems = document.querySelectorAll('.task-list > div[data-task-id]');
+        const taskColumns = document.querySelectorAll('.task-list');
+
+        taskItems.forEach(item => {
+            item.setAttribute('draggable', true);
+            item.addEventListener('dragstart', (event) => {
+                event.dataTransfer.setData('text/plain', event.target.closest('[data-task-id]').dataset.taskId);
+                event.target.closest('[data-task-id]').classList.add('dragging');
+            });
+            item.addEventListener('dragend', (event) => {
+                event.target.closest('[data-task-id]').classList.remove('dragging');
+            });
+        });
+
+        taskColumns.forEach(column => {
+            column.addEventListener('dragover', (event) => {
+                event.preventDefault(); // Necessary to allow dropping
+                const draggingItem = document.querySelector('.dragging');
+                if (draggingItem) { // Optional: visual feedback for drop target
+                    column.classList.add('dragover-target');
+                }
+            });
+            column.addEventListener('dragleave', (event) => {
+                 column.classList.remove('dragover-target');
+            });
+
+            column.addEventListener('drop', async (event) => {
+                event.preventDefault();
+                column.classList.remove('dragover-target');
+                const taskId = event.dataTransfer.getData('text/plain');
+                const targetStatus = column.parentElement.dataset.status; // e.g. 'todo', 'inprogress', 'done'
+                const taskElement = document.querySelector(`div[data-task-id='${taskId}']`);
+
+                if (taskElement && targetStatus) {
+                    // Optimistically move the element
+                    column.appendChild(taskElement); 
+
+                    // Update status on server
+                    try {
+                        const response = await fetch(`/tasks/${taskId}/status`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                // Add CSRF token header if you implement CSRF protection
+                            },
+                            body: JSON.stringify({ status: targetStatus })
+                        });
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            console.error('Failed to update task status:', errorData.message);
+                            // Revert optimistic update if server fails - more complex, might need to reload or move back
+                            // For simplicity, we'll alert and log, but a real app might move the element back
+                            alert('Error updating task. The item may not have saved correctly. Please refresh.');
+                            // Example: To move back, you'd need to know its original column.
+                            // This simplistic example doesn't store that, so a page refresh might be the easiest way to sync.
+                        } else {
+                            console.log('Task status updated successfully');
+                            // Check if placeholder text needs to be added/removed for source and target columns
+                            checkEmptyColumns();
+                        }
+                    } catch (err) {
+                        console.error('Network error updating task status:', err);
+                        alert('Network error. The item may not have saved correctly. Please refresh.');
+                    }
+                }
+            });
+        });
+        
+        function checkEmptyColumns() {
+            document.querySelectorAll('.task-list').forEach(list => {
+                const parentStatusDiv = list.parentElement;
+                let placeholder = parentStatusDiv.querySelector('.empty-column-placeholder');
+                // Count only task elements, not the placeholder itself
+                const taskCount = list.querySelectorAll('div[data-task-id]').length;
+
+                if (taskCount === 0) {
+                    if (!placeholder) {
+                        placeholder = document.createElement('p');
+                        placeholder.className = 'text-sm text-gray-500 text-center py-4 empty-column-placeholder';
+                        placeholder.textContent = 'No tasks here.';
+                        list.appendChild(placeholder);
+                    }
+                } else {
+                    if (placeholder) {
+                        placeholder.remove();
+                    }
+                }
+            });
+        }
+        // Initial check
+        checkEmptyColumns();
+    });
+  </script>
+  <style>
+    .dragging { opacity: 0.5; border: 2px dashed #cbd5e0; }
+    .dragover-target { background-color: #e2e8f0; } /* Light gray for drop target column */
+    .task-list > div[data-task-id] { /* Ensure direct children tasks are targeted for styling */
+        margin-bottom: 0.75rem; /* Equivalent to space-y-3 on parent */
+    }
+  </style>
+</body>
+</html>
