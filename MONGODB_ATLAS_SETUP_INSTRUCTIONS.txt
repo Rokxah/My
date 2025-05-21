@@ -1,0 +1,59 @@
+Follow these steps to set up a MongoDB Atlas cluster and connect your application:
+
+1.  **Go to MongoDB Atlas:**
+    Open your web browser and navigate to [https://www.mongodb.com/cloud/atlas](https://www.mongodb.com/cloud/atlas).
+
+2.  **Create an Account or Log In:**
+    If you don't have an account, sign up for a free account. Otherwise, log in to your existing account.
+
+3.  **Create a New Cluster:**
+    - Find and click the button to create a new cluster (it might be labeled "Build a Database", "Create Cluster", or similar).
+    - Choose the **Free Tier (M0 Sandbox)** option. This is sufficient for development and small projects.
+    - Select a cloud provider and region that is geographically close to you for lower latency.
+    - You can leave the default settings for cluster name and other options, or customize them if you prefer.
+    - Click "Create Cluster" (or a similar button). Provisioning the cluster might take a few minutes.
+
+4.  **Whitelist Your IP Address:**
+    For your application to connect to the cluster, you need to allow access from your IP address.
+    - In your cluster's dashboard, navigate to "Network Access" (usually found in the left-hand sidebar under "Security").
+    - Click "Add IP Address".
+    - **Option A (Recommended for initial setup/testing):** Click "Allow Access From Anywhere". This will add `0.0.0.0/0` to your IP access list.
+      **Security Warning:** Using `0.0.0.0/0` allows connections from any IP address. While convenient for initial setup, this is not recommended for production environments. For production, you should whitelist only the specific IP addresses of your application servers.
+    - **Option B (More Secure):** Click "Add Current IP Address" if you are working from a stable IP. If your IP address changes frequently, you might need to update this regularly.
+    - Add a description (e.g., "Home IP") and click "Confirm".
+
+5.  **Create a Database User:**
+    You need a database user for your application to authenticate with MongoDB.
+    - In your cluster's dashboard, navigate to "Database Access" (usually found in the left-hand sidebar under "Security").
+    - Click "Add New Database User".
+    - Choose an authentication method. "Password" (SCRAM) is common.
+    - Enter a **username** (e.g., `kanban_app_user`).
+    - Enter a **password**. Use a strong, unique password and **make sure to save it securely**. You can use the "Autogenerate Secure Password" option.
+    - Under "Database User Privileges", you can select "Read and write to any database" for simplicity during development, or specify more granular permissions if needed.
+    - Click "Add User".
+
+6.  **Get Your Connection String:**
+    This string is what your application will use to connect to the database.
+    - In your cluster's dashboard, go back to "Databases" (or "Clusters" / "Overview").
+    - Find your newly created cluster and click the "Connect" button.
+    - Select "Connect your application" (or "Drivers" or similar, depending on the UI version).
+    - **Choose your driver and version:** Select "Node.js" and the latest version available.
+    - **Copy the connection string provided.** It will look something like this:
+      `mongodb+srv://<username>:<password>@yourcluster.mongodb.net/<dbname>?retryWrites=true&w=majority`
+
+    - **Replace placeholders:**
+        - Replace `<username>` with the database username you created in Step 5.
+        - Replace `<password>` with the database password you created in Step 5.
+        - Replace `<dbname>` with the name you want for your database (e.g., `kanban_app`). If this database doesn't exist, MongoDB will create it when your application first connects and writes data.
+
+7.  **Set the `MONGODB_URI` Environment Variable:**
+    Your application code (in `src/index.js`) is configured to look for an environment variable named `MONGODB_URI` for the database connection string.
+    - **Local Development:**
+        - Create a `.env` file in the root of your project (ensure `.env` is listed in your `.gitignore` file to avoid committing it).
+        - Add the following line to your `.env` file, replacing the example string with your actual connection string from Step 6:
+          `MONGODB_URI="mongodb+srv://your_username:your_password@yourcluster.mongodb.net/kanban_app?retryWrites=true&w=majority"`
+        - You'll need to install a package like `dotenv` (`npm install dotenv`) and require it in your `src/index.js` (e.g., `require('dotenv').config();` at the very top) to load this variable from the `.env` file.
+    - **Deployment Environment (e.g., Heroku, Vercel, AWS):**
+        - Refer to your hosting provider's documentation for how to set environment variables. You will need to set `MONGODB_URI` to your connection string in the settings for your deployed application.
+
+After completing these steps, your application should be able to connect to your MongoDB Atlas cluster. Remember to restart your application server after setting the environment variable.

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-gray-100">
+  <%- include('../partials/navbar') %>
+  <div class="container mx-auto mt-10">
+    <h1 class="text-2xl font-bold mb-6">Create New Task for Board: <%= boardName %></h1>
+    <form action="/tasks" method="POST" class="bg-white p-8 rounded-lg shadow-md max-w-lg mx-auto">
+      <input type="hidden" name="boardId" value="<%= boardId %>">
+      <div class="mb-4">
+        <label for="title" class="block text-gray-700 font-bold mb-2">Title</label>
+        <input type="text" name="title" id="title" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" required>
+      </div>
+      <div class="mb-4">
+        <label for="description" class="block text-gray-700 font-bold mb-2">Description (Optional)</label>
+        <textarea name="description" id="description" rows="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"></textarea>
+      </div>
+      <div class="mb-6">
+        <label for="status" class="block text-gray-700 font-bold mb-2">Status</label>
+        <select name="status" id="status" class="shadow border rounded w-full py-2 px-3 text-gray-700">
+          <option value="todo" selected>To Do</option>
+          <option value="inprogress">In Progress</option>
+          <option value="done">Done</option>
+        </select>
+      </div>
+      <div class="flex items-center justify-between">
+        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Create Task</button>
+        <a href="/boards/<%= boardId %>" class="text-gray-600 hover:text-gray-800">Cancel</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>
